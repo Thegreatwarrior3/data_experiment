@@ -21,5 +21,16 @@ class WEATHERSTACK(object):
 
         req = self.requests.get(self.host, params=params)
 
-        return req
+        if not req.json().get('success'):            
+            error = req.json().get('error', {})
+            error_code = error.get('code', {})
+
+            if error_code == 101:
+                raise Exception('unauthorized: User did not supply invalid access key')
+            if error_code == 404:
+                raise Exception('404_not_found: user requested resource does not exist')
+            if error_code == 615:
+                raise Exception('request_failed: API request failed')
+        
+        return req.json()
 
